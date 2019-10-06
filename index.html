@@ -1,168 +1,261 @@
-<!doctype html>
-<html lang="en-us">
-  <head>
-    <title>Game of 15</title>
-    
-    <meta charset="utf-8"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="viewport" content="user-scalable=no"/>
-    
-    <style>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='' xml:lang=''>
+<head>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, user-scalable=no' />
+	<title></title>
+	<style type='text/css'>
 
-        div, a, span {
-            -moz-box-sizing: border-box;
-            box-sizing: border-box;
-        }
+		body {
+			touch-action: none;
+			margin: 0;
+			border: 0 none;
+			padding: 0;
+			text-align: center;
+			background-color: black;
+		}
 
-        body {
-            font-family: Helvetica, Arial, sans-serif;
-            line-height: 1.25em;
-            margin: 0;
-            padding: 0;
-            padding-top: 0px;
-            background-color: #000;
-            background-image: url("background.jpg");
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-        
-        .container {
-            position: relative;
-            text-align: center;
-            margin-top: 0;
-            min-height: 300px;
-        }
-        
-        .footer {
-            width: 500px;
-            margin: 0 auto;
-            padding: 20px 20px;
-            position: relative;
-            text-align: center;
-        }
-        
-        .footer a.link {
-            font-weight: bold;
-            font-family: Helvetica, Arial, sans-serif;
-            font-size: 12px;
-            text-align: center;
-            color: #fff;
-            text-decoration: none;
-            padding: 8px 10px;
-            border-radius: 6px;
-            color: #ccc;
-            -moz-transition: all .3s;
-            transition: all .3s;
-        }
-        
-        .footer a.link:hover {
-            color: #fff;
-            background-color: rgba(0,0,0,.5);
-        }
+		#canvas {
+			display: block;
+			margin: 0;
+			color: white;
+		}
 
-        .footer a.logo {
-            display: block;
-            margin: 0 auto;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            -moz-transition: all .3s;
-            transition: all .3s;
-        }
-        
-        .footer img {
-            height: 54px;
-            display: block;
-            margin: 0 auto;
-        }
-        
-        /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-        canvas.emscripten { background: #000; border: 0px none; padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+		#canvas:focus {
+			outline: none;
+		}
 
-    </style>
-  </head>
-  <body>
-    
-    <div style="text-align: center">
-        <div> <span id="agkstatus" style="color:#7f7f7f"></span> </div>
-        <div style="display: inline-block; border: 1px solid; margin: 0px auto">
-            <canvas class="emscripten" id="canvas" width="800" height="600" oncontextmenu="event.preventDefault()"></canvas>
-            <video crossOrigin="anonymous" style="display:none" id="AGKVideo" src=""></video>
-        </div>
-    </div>
-    
-    <div class="footer">
-        <a class="logo" href="http://www.appgamekit.com" target="_blank"><img src="made-with-appgamekit.png" alt="Made with AppGameKit"></a>
+		.godot {
+			font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+			color: #e0e0e0;
+			background-color: #3b3943;
+			background-image: linear-gradient(to bottom, #403e48, #35333c);
+			border: 1px solid #45434e;
+			box-shadow: 0 0 1px 1px #2f2d35;
+		}
 
-        <a class="link" href="#" onclick="Module.requestFullScreen(false,true)">Run game in fullscreen mode</a>
-        <a class="link" href="http://www.appgamekit.com" target="_blank">Learn more about AppGameKit</a>
-    </div>
-    
-    <script type='text/javascript'>
-      var agkStatus = document.getElementById("agkstatus");
-      if ( agkStatus )
-      {
-        agkStatus.textContent = "Loading...";
-      }
 
-      var Module = {
-        preRun: [],
-        postRun: [],
-        print: function(text) {},
-        printErr: function(text) {},
-        canvas: (function() {
-          var canvas = document.getElementById('canvas');
+		/* Status display
+		 * ============== */
 
-          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+		#status {
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			/* don't consume click events - make children visible explicitly */
+			visibility: hidden;
+		}
 
-          return canvas;
-        })(),
-        setStatus: function(text) {},
-        totalDependencies: 0,
-        monitorRunDependencies: function(left) {}
-      };
-      window.onerror = function(text) {
-        // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-        var agkStatus = document.getElementById("agkstatus");
-        if ( agkStatus )
-        {
-          agkStatus.style.color = "Red";
-          agkStatus.textContent = text;
-        }
-        //alert(text);
-      };
-    </script>
+		#status-progress {
+			width: 366px;
+			height: 7px;
+			background-color: #38363A;
+			border: 1px solid #444246;
+			padding: 1px;
+			box-shadow: 0 0 2px 1px #1B1C22;
+			border-radius: 2px;
+			visibility: visible;
+		}
 
-    <script>
+		@media only screen and (orientation:portrait) {
+			#status-progress {
+				width: 61.8%;
+			}
+		}
 
-    var script = document.createElement('script');
-    script.src = "AGKPlayer.asm.js";
-    script.onload = function() {
-      setTimeout(function() {
-        
-          (function() {
-            var memoryInitializer = 'AGKPlayer.html.mem';
-            if (typeof Module['locateFile'] === 'function') {
-              memoryInitializer = Module['locateFile'](memoryInitializer);
-            } else if (Module['memoryInitializerPrefixURL']) {
-              memoryInitializer = Module['memoryInitializerPrefixURL'] + memoryInitializer;
-            }
-            var xhr = Module['memoryInitializerRequest'] = new XMLHttpRequest();
-            xhr.open('GET', memoryInitializer, true);
-            xhr.responseType = 'arraybuffer';
-            xhr.send(null);
-          })();
+		#status-progress-inner {
+			height: 100%;
+			width: 0;
+			box-sizing: border-box;
+			transition: width 0.5s linear;
+			background-color: #202020;
+			border: 1px solid #222223;
+			box-shadow: 0 0 1px 1px #27282E;
+			border-radius: 3px;
+		}
 
-          var script = document.createElement('script');
-          script.src = "AGKPlayer.js";
-          document.body.appendChild(script);
+		#status-indeterminate {
+			visibility: visible;
+			position: relative;
+		}
 
-      }, 1); // delaying even 1ms is enough to allow compilation memory to be reclaimed
-    };
-    document.body.appendChild(script);
+		#status-indeterminate > div {
+			width: 4.5px;
+			height: 0;
+			border-style: solid;
+			border-width: 9px 3px 0 3px;
+			border-color: #2b2b2b transparent transparent transparent;
+			transform-origin: center 21px;
+			position: absolute;
+		}
 
-</script>
+		#status-indeterminate > div:nth-child(1) { transform: rotate( 22.5deg); }
+		#status-indeterminate > div:nth-child(2) { transform: rotate( 67.5deg); }
+		#status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
+		#status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
+		#status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
+		#status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
+		#status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
+		#status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
 
-  </body>
+		#status-notice {
+			margin: 0 100px;
+			line-height: 1.3;
+			visibility: visible;
+			padding: 4px 6px;
+			visibility: visible;
+		}
+	</style>
+
+</head>
+<body>
+	<canvas id='canvas'>
+		HTML5 canvas appears to be unsupported in the current browser.<br />
+		Please try updating or use a different browser.
+	</canvas>
+	<div id='status'>
+		<div id='status-progress' style='display: none;' oncontextmenu='event.preventDefault();'><div id ='status-progress-inner'></div></div>
+		<div id='status-indeterminate' style='display: none;' oncontextmenu='event.preventDefault();'>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
+		<div id='status-notice' class='godot' style='display: none;'></div>
+	</div>
+
+	<script type='text/javascript' src='index.js'></script>
+	<script type='text/javascript'>//<![CDATA[
+
+		var engine = new Engine;
+		var setStatusMode;
+		var setStatusNotice;
+
+		(function() {
+
+			const MAIN_PACK = 'index.pck';
+			const INDETERMINATE_STATUS_STEP_MS = 100;
+
+			var canvas = document.getElementById('canvas');
+			var statusProgress = document.getElementById('status-progress');
+			var statusProgressInner = document.getElementById('status-progress-inner');
+			var statusIndeterminate = document.getElementById('status-indeterminate');
+			var statusNotice = document.getElementById('status-notice');
+
+			var initializing = true;
+			var statusMode = 'hidden';
+
+			var animationCallbacks = [];
+			function animate(time) {
+				animationCallbacks.forEach(callback => callback(time));
+				requestAnimationFrame(animate);
+			}
+			requestAnimationFrame(animate);
+
+			function adjustCanvasDimensions() {
+				canvas.width = innerWidth;
+				canvas.height = innerHeight;
+			}
+			animationCallbacks.push(adjustCanvasDimensions);
+			adjustCanvasDimensions();
+
+			setStatusMode = function setStatusMode(mode) {
+
+				if (statusMode === mode || !initializing)
+					return;
+				[statusProgress, statusIndeterminate, statusNotice].forEach(elem => {
+					elem.style.display = 'none';
+				});
+				if (animateStatusIndeterminate in animationCallbacks) {
+					animationCallbacks.erase(animateStatusIndeterminate);
+				}
+				switch (mode) {
+					case 'progress':
+						statusProgress.style.display = 'block';
+						break;
+					case 'indeterminate':
+						statusIndeterminate.style.display = 'block';
+						animationCallbacks.push(animateStatusIndeterminate);
+						break;
+					case 'notice':
+						statusNotice.style.display = 'block';
+						break;
+					case 'hidden':
+						break;
+					default:
+						throw new Error('Invalid status mode');
+				}
+				statusMode = mode;
+			}
+
+			function animateStatusIndeterminate(ms) {
+
+				var i = Math.floor(ms / INDETERMINATE_STATUS_STEP_MS % 8);
+				if (statusIndeterminate.children[i].style.borderTopColor == '') {
+					Array.prototype.slice.call(statusIndeterminate.children).forEach(child => {
+						child.style.borderTopColor = '';
+					});
+					statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
+				}
+			}
+
+			setStatusNotice = function setStatusNotice(text) {
+
+				while (statusNotice.lastChild) {
+					statusNotice.removeChild(statusNotice.lastChild);
+				}
+				var lines = text.split('\n');
+				lines.forEach((line) => {
+					statusNotice.appendChild(document.createTextNode(line));
+					statusNotice.appendChild(document.createElement('br'));
+				});
+			};
+
+			engine.setProgressFunc((current, total) => {
+
+				if (total > 0) {
+					statusProgressInner.style.width = current/total * 100 + '%';
+					setStatusMode('progress');
+					if (current === total) {
+						// wait for progress bar animation
+						setTimeout(() => {
+							setStatusMode('indeterminate');
+						}, 500);
+					}
+				} else {
+					setStatusMode('indeterminate');
+				}
+			});
+
+			function displayFailureNotice(err) {
+				var msg = err.message || err;
+				console.error(msg);
+				setStatusNotice(msg);
+				setStatusMode('notice');
+				initializing = false;
+			};
+
+			if (!Engine.isWebGLAvailable()) {
+				displayFailureNotice('WebGL not available');
+			} else {
+				setStatusMode('indeterminate');
+				engine.setCanvas(canvas);
+				engine.startGame(MAIN_PACK).then(() => {
+					setStatusMode('hidden');
+					initializing = false;
+				}, displayFailureNotice);
+			}
+		})();
+	//]]></script>
+</body>
 </html>
+
